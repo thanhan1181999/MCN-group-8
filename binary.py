@@ -24,7 +24,7 @@ class binaryCompress:
     return result
 
   # hàm để tạo những giá trị lưu trong mảng (mang thông tin thay đổi của ảnh sau khi decode)
-  def convert_to_difference_element(self,time,i,j):
+  def convert_to_difference_element(self,time,i,j): # 7 2
     space = int ( (time+1)/2 )
     up = 0
     down = 0
@@ -38,7 +38,7 @@ class binaryCompress:
       else:
         up = self.img[i-space,j]
         down = self.img[i+space,j]
-      return int( (up+down)/2 - self.img[i,j])
+      return int((up+down)/2) - self.img[i,j]
     else: # lần chẵn lấy phải trên cộng trái dưới chia 2 - vị trí hiện tại
       if (i+space)>=self.row and (j+space)>=self.col:
         up = 0
@@ -52,7 +52,9 @@ class binaryCompress:
       else:
         up = self.img[i-space,j+space]
         down = self.img[i+space,j-space]
-      return int( (up+down)/2 - self.img[i,j])
+      return int((up+down)/2) - self.img[i,j]
+
+   # hàm để tạo những giá trị lưu trong mảng (mang thông tin thay đổi của ảnh sau khi decode)
 
   # chuyển đổi để nhận biết hàng chẵn lẻ
   def convert_row_and_column(self,i,space):
@@ -70,13 +72,13 @@ class binaryCompress:
       if self.convert_row_and_column(i+1,space) % 2 == 0:# hàng chẵn bỏ pixel lẻ
         for j in range(0,self.col,space):
           if self.convert_row_and_column(j+1,space) % 2== 1:
-            self.img[i,j] = self.DELETE
             difference[i][j] = self.convert_to_difference_element(time,i,j)
+            self.img[i,j] = self.DELETE
       else: # hàng lẻ bỏ pixel chẵn
         for j in range(0,self.col,space):
           if self.convert_row_and_column(j+1,space) % 2 == 0:
-            self.img[i,j] = self.DELETE
             difference[i][j] = self.convert_to_difference_element(time,i,j)
+            self.img[i,j] = self.DELETE
     self.differences.append(difference)
   
   # khi ở bước chẵn, xóa hàng chẵn
@@ -85,9 +87,9 @@ class binaryCompress:
     space = self.space(time)
     for i in range(0,self.row,space): 
       if self.convert_row_and_column(i+1,space) % 2 == 0:# hàng chẵn bỏ 
-        for j in range(0,self.col,space):
-          self.img[i,j] = self.DELETE
+        for j in range(space,self.col,space*2):
           difference[i][j] = self.convert_to_difference_element(time,i,j)
+          self.img[i,j] = self.DELETE
     self.differences.append(difference)
 
   # hàm xóa những pixel bị xóa(những ô bị xóa đk gán là 0), để cho ra mảng những pixel còn lại
@@ -115,7 +117,7 @@ class binaryCompress:
     #------
     return np.array(list)
 
-  #hàm main chính
+  #hàm nén ảnh
   def encode(self):
     for time in range(1,self.compression_times+1):
       #nếu lần phân rã lẻ : hàng lẻ bỏ pixel chẵn, hàng chẵn bỏ pixel lẻ
@@ -124,37 +126,113 @@ class binaryCompress:
         self.action_in_odd_time(time)
       else:
         self.action_in_even_time(time)
-  
+  #----------------------------------------------------------------------------------------------------
+
+  # hàm trả về giá trị pixel cỉa ảnh gốc
+  def convert_difference_element_back(self,time,i,j,difference):
+    space = int ( (time+1)/2 )
+    up = 0
+    down = 0
+    if time % 2 == 1: # lần lẻ lấy trên cộng dưới chia 2 - vị trí hiện tại
+      if (i-space)<0 :
+        up = 0
+        down = self.img[i+space,j]
+      elif (i+space)>=self.row:
+        up = self.img[i-space,j]
+        down = 0
+      else:
+        up = self.img[i-space,j]
+        down = self.img[i+space,j]
+      return int( (up+down)/2 - difference[i][j])
+    else: # lần chẵn lấy phải trên cộng trái dưới chia 2 - vị trí hiện tại
+      if (i+space)>=self.row and (j+space)>=self.col:
+        up = 0
+        down = 0
+      elif (i+space)>=self.row:
+        up = self.img[i-space,j+space]
+        down = 0
+      elif (j+space)>=self.col:
+        down = self.img[i+space,j-space]
+        up = 0
+      else:
+        up = self.img[i-space,j+space]
+        down = self.img[i+space,j-space]
+      return int( (up+down)/2 - difference[i][j])
+
   # hàm lưu ảnh
-  def save_result_image(self):
-    cv2.imwrite("img3-encode-{}-time.jpg".format(self.compression_times), 
-      self.delete_element_0_from_array_image())
+  def save_result_image(self,type = 0):
+    if type != 0:
+      file_name = "img-decode-{}-time.jpg".format(self.compression_times) 
+    else:
+      file_name = "img-encode-{}-time.jpg".format(self.compression_times) 
+    cv2.imwrite(file_name, self.delete_element_0_from_array_image())
 
+  # hàm giải mã ảnh về ban đầu
+  def decode(self):
+    for i in range(self.compression_times-1,-1,-1):
+      space = self.space(i+1)
+      for x in range(0,self.row,space):
+        for y in range(0,self.col,space):
+          if self.differences[i][x][y] is not None:
+            self.img[x,y] = self.convert_difference_element_back(i+1,x,y,self.differences[i])
+              
+  # lưu các mảng chứa phần thay đổi ra file
+  # def save_diffence_to_file(self):
+  #   for i in range(len(self.differences)):
+  #     file = open("diff-{}.txt".format(i+1), "w")
+  #     difference = self.differences[i]
+  #     for x in range(self.row):
+  #       for y in range(self.col):
+  #         file.write(  "{} ".format(difference[x][y]) )
+  #     file.close()
 
+  #----------------------------------------------------------------------------------------------------
+  # def print_diff(self,i):
+  #   for i in range(self.compression_times-1,-1,-1):
+  #   print(self.differences[i])
+  # def print_img(self):
+  #   print(self.img)
+        
 #=============================Chạy test kết quả================================
-task1 = binaryCompress("img3.jpg",1)
+# task1 = binaryCompress("img_test.jpg",2)
+# print(task1.convert_to_difference_element(1,7,2))
+# task1.encode()
+# task1.print_img()
+# task1.print_diff(1)
+# task1.print_diff()
+# print(task1.convert_to_difference_element(1,0,3))
+# task1.save_result_image()
+# task1.save_diffence_to_file()
+# task1.decode()
+# task1.print_img()
+# task1.save_result_image()
+
+task1 = binaryCompress("img1.jpg",5)
 task1.encode()
 task1.save_result_image()
+task1.decode()
+task1.save_result_image(1)
 
-task2 = binaryCompress("img3.jpg",2)
-task2.encode()
-task2.save_result_image()
 
-task3 = binaryCompress("img3.jpg",3)
-task3.encode()
-task3.save_result_image()
+# task2 = binaryCompress("img3.jpg",2)
+# task2.encode()
+# task2.save_result_image()
 
-task4 = binaryCompress("img3.jpg",4)
-task4.encode()
-task4.save_result_image()
+# task3 = binaryCompress("img3.jpg",3)
+# task3.encode()
+# task3.save_result_image()
 
-task5 = binaryCompress("img3.jpg",5)
-task5.encode()
-task5.save_result_image()
+# task4 = binaryCompress("img3.jpg",4)
+# task4.encode()
+# task4.save_result_image()
 
-task6 = binaryCompress("img3.jpg",6)
-task6.encode()
-task6.save_result_image()
+# task5 = binaryCompress("img3.jpg",5)
+# task5.encode()
+# task5.save_result_image()
+
+# task6 = binaryCompress("img3.jpg",6)
+# task6.encode()
+# task6.save_result_image()
 
 # task7 = binaryCompress("img1.jpg",7)
 # task7.encode()

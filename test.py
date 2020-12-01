@@ -1,21 +1,21 @@
-from PIL import Image
-import numpy
+# from PIL import Image
+# import numpy
 
-img = Image.open('img1.jpg') # input ảnh
-arr = numpy.array(img) # convert to array from img
-row = len(arr) # chiều cao (số hàng)
-column = len(arr[0]) # chiều rộng (số cột)
+# img = Image.open('img1.jpg') # input ảnh
+# arr = numpy.array(img) # convert to array from img
+# row = len(arr) # chiều cao (số hàng)
+# column = len(arr[0]) # chiều rộng (số cột)
 
-# cho la 000
-for i in range(row): 
-  if (i+1) % 2 == 0:
-    for j in range(column):
-      if (j+1) % 2== 1:
-        arr[i,j]=[255,255,255]
-  else:
-    for j in range(column):
-      if (j+1) % 2 == 0:
-        arr[i,j]=[255,255,255]
+# # cho la 000
+# for i in range(row): 
+#   if (i+1) % 2 == 0:
+#     for j in range(column):
+#       if (j+1) % 2== 1:
+#         arr[i,j]=[255,255,255]
+#   else:
+#     for j in range(column):
+#       if (j+1) % 2 == 0:
+#         arr[i,j]=[255,255,255]
 
 # tách riêng các mảng red green blue
 # arr_red   = numpy.array([[0 for row in range(column)] for col in range(row)])
@@ -113,6 +113,6 @@ for i in range(row):
 # print(arr_result)
 # data = numpy.zeros((330,660, 3), dtype=numpy.uint8)
 # data[330,660] = arr_result
-new_img = Image.fromarray(arr)
+# new_img = Image.fromarray(arr)
 
-new_img.save("img1-new.jpg")
+# new_img.save("img1-new.jpg")

@@ -5,13 +5,15 @@ import cv2
 class binaryCompress:
   def __init__(self,img,compression_times):
     # setting binary tree by array
-    self.img = cv2.imread(img,0)
+    self.img = img
     self.compression_times = compression_times
     self.differences = []
         # vd khi compression_times = 6, differences chứa 6 phần tử
         #mỗi phần tử là 1 mảng tương ứng sau mỗi lần phân rã
-    self.row, self.col = self.img.shape
+    self.row = len(self.img)
+    self.col = len(self.img[0])
     self.DELETE = 0
+    self.maxlenth = 0 # lưu giá trị len của hàng dài nhất, khi ảnh được nén
 
   # khởi tạo dạng ban đầu của những mảng chứa thông tin thay đổi của ảnh sau khi decode
   def initializes_the_array_with_none(self):
@@ -111,6 +113,7 @@ class binaryCompress:
         max = length
     #------  
     print("max length : ",max)
+    self.maxlenth = max
     for i in range(len(list)):
       while len(list[i]) < max:
         list[i].append(0)
@@ -175,30 +178,3 @@ class binaryCompress:
         for y in range(0,self.col,space):
           if self.differences[i][x][y] is not None:
             self.img[x,y] = self.convert_difference_element_back(i+1,x,y,self.differences[i])
-              
-  # lưu các mảng chứa phần thay đổi ra file
-  # def save_diffence_to_file(self):
-  #   for i in range(len(self.differences)):
-  #     file = open("diff-{}.txt".format(i+1), "w")
-  #     difference = self.differences[i]
-  #     for x in range(self.row):
-  #       for y in range(self.col):
-  #         file.write(  "{} ".format(difference[x][y]) )
-  #     file.close()
-#=============================Chạy test kết quả================================
-task1 = binaryCompress("img1.jpg",4)
-task1.encode()
-task1.save_result_image()
-task1.decode()
-task1.save_result_image(1)
-
-# print(len(task4.differences))
-# print(task4.differences[0])
-# https://www.kite.com/python/answers/how-to-save-a-numpy-array-to-a-text-file-in-python#:~:text=Use%20numpy.,array%20to%20a%20text%20file&text=Use%20a%20for%2Dloop%20to,to%20the%20opened%20file%20fname%20.&text=The%20resulting%20text%20file%20can%20be%20loaded%20back%20into%20an%20array%20.
-# for i in range(len(task4.differences)):
-#   dif = np.array(task4.differences[i])
-#   file_name = "diff_{}.txt".format(i)
-#   a_file = open(file_name, "w")
-#   for row in dif:
-#     np.savetxt(file_name, row)
-#   a_file.close()

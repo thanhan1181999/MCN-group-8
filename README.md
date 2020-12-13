@@ -20,7 +20,8 @@ XỬ LÝ VỚI ẢNH MÀU (với 3 điểm ảnh rgb)
               để xem ảnh được nén, và ảnh sau khi khôi phục
 
 RUN
-  py binary.py
+
+py binary.py
   - trả về ảnh màu xám, sau khi nén 4 lần, và ảnh sau khi giải nén lại  
-  py main.py
+py main.py
   - trả về ảnh màu, sau khi nén 2 lần, và ảnh sau khi giải nén lại
